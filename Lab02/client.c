@@ -55,13 +55,15 @@ while(1){
    
    /* Now read file from server */
     FILE *fp;
-    fp = fopen("sample_file.txt", "ab"); 
+    /*fp = fopen("sample_file.txt", "ab"); 
     if(NULL == fp)
     {
         printf("Error opening file");
         return;
     }   
+
     /* Receive data in chunks of 256 bytes */
+     printf("Error opening file");
     while((bytesReceived = read(sockfd, recvBuff, 256)) > 0)
     {
        // printf("Bytes received %d\n",bytesReceived);    
