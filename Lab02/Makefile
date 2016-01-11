@@ -5,8 +5,7 @@ CL_STRING=$(OK_COLOR)[Cleaning Up..]$(NO_COLOR)
 all:
 	@/bin/echo -e "$(CO_STRING)"
 	@g++ -std=c++11 -o server server.c
-	@g++ -std=c++11 -o server1 server1.c
-	@g++ -std=c++11 -o server2 server2.c
+	@gcc -pthread -o client client.c
 clean:
 	@/bin/echo -e "$(CL_STRING)"
-	@rm server1 server2
+	@rm server client
