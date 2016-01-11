@@ -6,10 +6,12 @@
 #include <pthread.h>
 #include <string.h>
 char **glob;
+int temp = 0;
 void fxn(void* a)
 {
+	printf("%d\n",temp );
 	while(1)
-	{
+	{	
 		int sockfd, portno, n;
 		struct sockaddr_in serv_addr;
 		struct hostent *server;
@@ -51,8 +53,12 @@ void fxn(void* a)
 		*/
 		 
 		/* Send message to the server */
-		n = write(sockfd, "get files/foo1.txt", strlen("get files/foo1.txt"));
-		
+
+		char str[50] = "get files/foo1.txt";
+		//char num= atoi(temp);
+		//strcat(str, num);
+
+		n = write(sockfd, str,50);
 		if (n < 0) 
 		{
 			perror("ERROR writing to socket");
@@ -101,6 +107,13 @@ int main(int argc, char *argv[])
 	while(i<100)
 	{
 		void* a;
-		pthread_create( &thread[i], NULL, fxn, a);i++;
+		pthread_create( &thread[i], NULL, fxn, a);
+		i++;
+		temp++;
+	}
+	i=0;
+	while(i<100)
+	{
+		pthread_join( thread[i], NULL);i++;
 	}
 }
