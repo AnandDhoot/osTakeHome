@@ -11,7 +11,6 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 using namespace std;
-static int count = 0
 
 static void	sigchld_handler(int signo) 
 {
@@ -42,7 +41,8 @@ void childprocessing (int sock)
 	string req(buffer);
 	//strip get and /n
 	req=req.erase(0,4);
-	//req=req.substr(0,req.length()-1);
+	if(req.back()=='\n')
+		req=req.substr(0,req.length()-1);
 	printf("%s\n",req.c_str());
 	//Fetch File from disk and send
 

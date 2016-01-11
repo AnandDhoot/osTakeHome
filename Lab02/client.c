@@ -61,6 +61,7 @@ void fxn(void* a)
 		 
 		/* Now read file from server */
 		FILE *fp;
+		/*
 		fp = fopen("sample_file.txt", "ab"); 
 		if(NULL == fp)
 		{
