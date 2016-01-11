@@ -1,17 +1,28 @@
 #include <stdio.h>
 #include <stdlib.h>
-
 #include <netdb.h>
 #include <netinet/in.h>
 #include <pthread.h>
 #include <string.h>
+#include <sys/time.h>
+#include <sys/types.h>
+
+#define NUM_FILES 500
+
 char **glob;
 int temp = 0;
 void fxn(void* a)
 {
 	printf("%d\n",temp );
+
+	struct timeval tim;
+	gettimeofday(&tim, NULL);
+	double t1 = tim.tv_sec + (tim.tv_usec/1000000.0);
+
 	while(1)
 	{	
+		int r = rand() % NUM_FILES;
+
 		int sockfd, portno, n;
 		struct sockaddr_in serv_addr;
 		struct hostent *server;
@@ -53,8 +64,13 @@ void fxn(void* a)
 		*/
 		 
 		/* Send message to the server */
+		int random = 0;
+		if(strcmp("random", glob[6]) == 0)
+			random = 1;
 
 		char str[50] = "get files/foo1.txt";
+		if(random == 1)
+			sprintf(str, "get files/foo%d.txt", r);
 		//char num= atoi(temp);
 		//strcat(str, num);
 
@@ -85,15 +101,26 @@ void fxn(void* a)
 
 		if(bytesReceived < 0)
 		{
-				printf("\n Read Error \n");
+			printf("\n Read Error \n");
 		}
 		close(sockfd);
-		return;
+
+		struct timeval tim;
+		gettimeofday(&tim, NULL);
+		double t2 = tim.tv_sec + (tim.tv_usec/1000000.0);
+
+		printf("%d, %f\n", atoi(glob[4]), t2-t1);
+		if((t2-t1) > atoi(glob[4]))
+			break;
+
+		sleep(atoi(glob[5]));
 	}
+	return;
 }
 int main(int argc, char *argv[]) 
-{
-
+{	
+	srand(time(NULL));
+	int numProc = atoi(argv[3]);
 
 	if (argc < 3) 
 	{
@@ -103,8 +130,8 @@ int main(int argc, char *argv[])
 	
 	glob=argv;
 	int i=0;
-	pthread_t thread[100];
-	while(i<100)
+	pthread_t thread[numProc];
+	while(i<numProc)
 	{
 		void* a;
 		pthread_create( &thread[i], NULL, fxn, a);
@@ -112,8 +139,9 @@ int main(int argc, char *argv[])
 		temp++;
 	}
 	i=0;
-	while(i<100)
+	while(i<numProc)
 	{
 		pthread_join( thread[i], NULL);i++;
 	}
+
 }

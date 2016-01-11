@@ -11,6 +11,7 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 using namespace std;
+static int count = 0;
 
 static void	sigchld_handler(int signo) 
 {
@@ -40,10 +41,12 @@ void childprocessing (int sock)
 	}
 	string req(buffer);
 	//strip get and /n
+	// printf("Req %s", req.c_str());
 	req=req.erase(0,4);
 	if(req.back()=='\n')
-		req=req.substr(0,req.length()-1);
-	printf("%s\n",req.c_str());
+		req=req.substr(0,14);
+		// req=req.substr(0,req.length()-1);
+	printf("%s %d\n",req.c_str(), count);
 	//Fetch File from disk and send
 
 	FILE *fp = fopen(req.c_str(),"r");
@@ -124,7 +127,7 @@ int main( int argc, char *argv[] )
 		return 2;
 	}
 	
-	listen(main_socket, 5);// Listen on main socket
+	listen(main_socket, 150);// Listen on main socket
 
 	while (1) 
 	{
@@ -136,6 +139,8 @@ int main( int argc, char *argv[] )
 			exit(1);
 		}
 		
+		count += 1;
+
 		/* Create child process */
 		pid = fork();
 	
