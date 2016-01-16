@@ -13,7 +13,7 @@
 using namespace std;
 static int count = 0;
 
-static void	sigchld_handler(int signo) 
+static void  chld_reap_handler(int no) 
 {
 	pid_t PID;
 	do  
@@ -22,14 +22,14 @@ static void	sigchld_handler(int signo)
 	} 
 	while ( PID != -1 );
 
-    /* Re-instate handler */
-	signal(SIGCHLD,sigchld_handler);
+
+	signal(SIGCHLD,chld_reap_handler);
 }
 void childprocessing (int sock) 
 {
 	int n;
-	char buffer[256];
-	bzero(buffer,256);
+	char buffer[512];
+	bzero(buffer,512);
 
 	//get filename to fetch
 	n = read(sock,buffer,255);
@@ -60,32 +60,30 @@ void childprocessing (int sock)
 	while(1)
 	{
 		/* First read file in chunks of 256 bytes */
-		bzero(buffer,256);
-		int nread = fread(buffer,1,256,fp);      
+		bzero(buffer,512);
+		int nread = fread(buffer,1,512,fp);      
 
 		/* If read was success, send data. */
 		if(nread > 0)
-		{
 			write(sock, buffer, nread);
-		}
 
 		// file finished
-		if (nread < 256)
+		if (nread < 512)
 		{
 			if (ferror(fp))
 					printf("Error reading\n");
 			break;
 		}
 	}
+	//close file
 	fclose(fp);
 }
 
 int main( int argc, char *argv[] ) 
 {
-	int main_socket , new_socket,sd;// to store various socket descriptors,array of  descriptors
+	int main_socket , new_socket,sd;// to store various socket descriptors
 
-
-	int pid;
+	int pid; // pid of forked childs
 
 	char buffer[1025];  //data buffer of 1K
 	
@@ -105,10 +103,12 @@ int main( int argc, char *argv[] )
 		return 1;
 	}
 
-	signal(SIGCHLD,sigchld_handler);
+	signal(SIGCHLD,chld_reap_handler); //Initialze signal for handling child reaping
+
 	struct sockaddr_in cli_addr,serv_addr; // address structs to store serv, new client, array for connected clients
 
 	socklen_t addrlen=sizeof(cli_addr); //to store size of cli_addr   
+
 	//Open the Main socket
 	main_socket = socket(AF_INET , SOCK_STREAM , 0);
 	
@@ -147,7 +147,7 @@ int main( int argc, char *argv[] )
 		if (pid < 0) 
 		{
 			perror("ERROR on fork");
-			exit(1);
+			return 1;
 		}
 		
 		if (pid == 0) 
@@ -155,7 +155,7 @@ int main( int argc, char *argv[] )
 			/* This is the child process */
 			close(main_socket);
 			childprocessing(new_socket);
-			exit(0);
+			return 0;
 		}
 		else 
 		{

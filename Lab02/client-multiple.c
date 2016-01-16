@@ -11,24 +11,26 @@
 
 char **glob;
 int temp = 0;
+unsigned long bytesRead[100];
 void fxn(void* a)
-{
-	printf("%d\n",temp );
-
+{	
+	int thread_id= *(int*)a; //id of the current thread
+	bytesRead[thread_id]=0;
+	printf("%d\n",thread_id);
+	
 	struct timeval tim;
 	gettimeofday(&tim, NULL);
 	double t1 = tim.tv_sec + (tim.tv_usec/1000000.0);
 
 	while(1)
 	{	
-		int r = rand() % NUM_FILES;
+		int r = rand() % NUM_FILES; // gen int to fetch random file
 
 		int sockfd, portno, n;
 		struct sockaddr_in serv_addr;
 		struct hostent *server;
-		int bytesReceived = 0;
-		char recvBuff[256];
-		char buffer[256];
+		
+		char recBuff[512];
 		portno = atoi(glob[2]);
 		/* Create a socket point */
 		sockfd = socket(AF_INET, SOCK_STREAM, 0);
@@ -58,21 +60,16 @@ void fxn(void* a)
 			perror("ERROR connecting");
 			exit(1);
 		}
- 
-		/* Now ask for a message from the user, this message
-		* will be read by server
-		*/
+
 		 
-		/* Send message to the server */
 		int random = 0;
 		if(strcmp("random", glob[6]) == 0)
 			random = 1;
 
 		char str[50] = "get files/foo1.txt";
+
 		if(random == 1)
 			sprintf(str, "get files/foo%d.txt", r);
-		//char num= atoi(temp);
-		//strcat(str, num);
 
 		n = write(sockfd, str,50);
 		if (n < 0) 
@@ -82,21 +79,25 @@ void fxn(void* a)
 		}
 		 
 		/* Now read file from server */
-		FILE *fp;
+
+		//FILE *fp;
 		/*
 		fp = fopen("sample_file.txt", "ab"); 
 		if(NULL == fp)
 		{
 				printf("Error opening file");
 				return;
-		}   
-		/* Receive data in chunks of 256 bytes */
-		while((bytesReceived = read(sockfd, recvBuff, 256)) > 0)
+		}
+   
+		/* Receive data in chunks of 512 bytes */
+		int bytesReceived = 0;
+		while((bytesReceived = read(sockfd, recBuff, 512)) > 0)
 		{
 			 // printf("Bytes received %d\n",bytesReceived);    
 				// recvBuff[n] = 0;
 				//fwrite(recvBuff, 1,bytesReceived,fp);
 			 // printf("%s \n", recvBuff);
+			bytesRead[thread_id]+=bytesReceived;
 		}
 
 		if(bytesReceived < 0)
@@ -133,8 +134,9 @@ int main(int argc, char *argv[])
 	pthread_t thread[numProc];
 	while(i<numProc)
 	{
-		void* a;
-		pthread_create( &thread[i], NULL, fxn, a);
+		int *a = malloc(sizeof(*a));
+		*a=i;
+		pthread_create( &thread[i], NULL, fxn, (void*)a);
 		i++;
 		temp++;
 	}
@@ -143,5 +145,14 @@ int main(int argc, char *argv[])
 	{
 		pthread_join( thread[i], NULL);i++;
 	}
+	i=0;
+	float totalData=0.0;
+	//Stats Calculations
+	while(i<numProc)
+	{
+		totalData+=bytesRead[i];
+		i++;
+	}
+	printf("ThroughPut(Bytes/s): %f\n",totalData/atoi(argv[4]));	
 
 }
