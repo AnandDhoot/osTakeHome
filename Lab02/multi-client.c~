@@ -123,7 +123,7 @@ void fxn(void* a)
 		gettimeofday(&tim, NULL);
 		double t2 = tim.tv_sec + (tim.tv_usec/1000000.0);
 
-		// printf("%d, %f\n", atoi(glob[4]), t2-t1);
+		printf("%d, %f\n", atoi(glob[4]), t2-t1);
 		if((t2-t1) > atoi(glob[4]))
 			break;
 
@@ -177,7 +177,6 @@ int main(int argc, char *argv[])
 	totalResTime /= (atoi(argv[3]));
 		gettimeofday(&tim, NULL);
 		double reqEnd = tim.tv_sec + (tim.tv_usec/1000000.0);
-	printf("Done!");
 	printf("throughput = %f (req/s)\n",totalData/(reqEnd-reqStart));	
 	printf("average response time = %f sec\n", totalResTime);	
 }
