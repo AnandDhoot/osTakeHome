@@ -15,12 +15,12 @@ static int count = 0;
 
 static void  chld_reap_handler(int no) 
 {
-	pid_t PID;
+	pid_t id;
 	do  
 	{
-		PID = waitpid(-1,0,WNOHANG);
+		id = waitpid(-1,0,WNOHANG);
 	} 
-	while ( PID != -1 );
+	while ( id != -1 );
 	signal(SIGCHLD,chld_reap_handler);
 }
 void childprocessing (int sock) 
