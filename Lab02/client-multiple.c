@@ -97,7 +97,7 @@ void fxn(void* a)
 				// recvBuff[n] = 0;
 				//fwrite(recvBuff, 1,bytesReceived,fp);
 			 // printf("%s \n", recvBuff);
-			bytesRead[thread_id]+=bytesReceived;
+			//bytesRead[thread_id]+=bytesReceived;
 		}
 
 		if(bytesReceived < 0)
@@ -105,7 +105,7 @@ void fxn(void* a)
 			printf("\n Read Error \n");
 		}
 		close(sockfd);
-
+		bytesRead[thread_id]++;
 		struct timeval tim;
 		gettimeofday(&tim, NULL);
 		double t2 = tim.tv_sec + (tim.tv_usec/1000000.0);
@@ -153,6 +153,6 @@ int main(int argc, char *argv[])
 		totalData+=bytesRead[i];
 		i++;
 	}
-	printf("ThroughPut(Bytes/s): %f\n",totalData/atoi(argv[4]));	
+	printf("ThroughPut(req/s): %f\n",totalData/atoi(argv[4]));	
 
 }
