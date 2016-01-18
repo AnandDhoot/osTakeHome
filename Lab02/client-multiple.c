@@ -17,7 +17,7 @@ void fxn(void* a)
 {	
 	int thread_id= *(int*)a; //id of the current thread
 	reqFulfilled[thread_id]=0;
-	printf("%d\n",thread_id);
+	//printf("%d\n",thread_id);
 	
 	struct timeval tim;
 	gettimeofday(&tim, NULL);
@@ -67,10 +67,10 @@ void fxn(void* a)
 		if(strcmp("random", glob[6]) == 0)
 			random = 1;
 
-		char str[50] = "get files/foo1.txt";
+		char str[50] = "get /tmp/files/foo1.txt";
 
 		if(random == 1)
-			sprintf(str, "get files/foo%d.txt", r);
+			sprintf(str, "get /tmp/files/foo%d.txt", r);
 
 
 		struct timeval tim;
@@ -146,6 +146,9 @@ int main(int argc, char *argv[])
 	
 	glob=argv;
 	int i=0;
+		struct timeval tim;
+		gettimeofday(&tim, NULL);
+		double reqStart = tim.tv_sec + (tim.tv_usec/1000000.0);
 	pthread_t thread[numProc];
 	while(i<numProc)
 	{
@@ -172,7 +175,8 @@ int main(int argc, char *argv[])
 	}
 
 	totalResTime /= (atoi(argv[3]));
-
-	printf("throughput = %f (req/s)\n",totalData/atoi(argv[4]));	
+		gettimeofday(&tim, NULL);
+		double reqEnd = tim.tv_sec + (tim.tv_usec/1000000.0);
+	printf("throughput = %f (req/s)\n",totalData/(reqEnd-reqStart));	
 	printf("average response time = %f sec\n", totalResTime);	
 }
