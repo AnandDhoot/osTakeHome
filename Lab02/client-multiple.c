@@ -11,11 +11,12 @@
 
 char **glob;
 int temp = 0;
-unsigned long bytesRead[100];
+long reqFulfilled[100];
+double responseTime[100];
 void fxn(void* a)
 {	
 	int thread_id= *(int*)a; //id of the current thread
-	bytesRead[thread_id]=0;
+	reqFulfilled[thread_id]=0;
 	printf("%d\n",thread_id);
 	
 	struct timeval tim;
@@ -71,6 +72,11 @@ void fxn(void* a)
 		if(random == 1)
 			sprintf(str, "get files/foo%d.txt", r);
 
+
+		struct timeval tim;
+		gettimeofday(&tim, NULL);
+		double reqStart = tim.tv_sec + (tim.tv_usec/1000000.0);
+
 		n = write(sockfd, str,50);
 		if (n < 0) 
 		{
@@ -97,7 +103,7 @@ void fxn(void* a)
 				// recvBuff[n] = 0;
 				//fwrite(recvBuff, 1,bytesReceived,fp);
 			 // printf("%s \n", recvBuff);
-			//bytesRead[thread_id]+=bytesReceived;
+			//reqFulfilled[thread_id]+=bytesReceived;
 		}
 
 		if(bytesReceived < 0)
@@ -105,8 +111,15 @@ void fxn(void* a)
 			printf("\n Read Error \n");
 		}
 		close(sockfd);
-		bytesRead[thread_id]++;
-		struct timeval tim;
+
+		// struct timeval tim;
+		gettimeofday(&tim, NULL);
+		double reqEnd = tim.tv_sec + (tim.tv_usec/1000000.0);
+
+		reqFulfilled[thread_id]++;
+		responseTime[thread_id] += (reqEnd - reqStart);
+
+		// struct timeval tim;
 		gettimeofday(&tim, NULL);
 		double t2 = tim.tv_sec + (tim.tv_usec/1000000.0);
 
@@ -116,6 +129,8 @@ void fxn(void* a)
 
 		sleep(atoi(glob[5]));
 	}
+
+	responseTime[thread_id] /= reqFulfilled[thread_id];
 	return;
 }
 int main(int argc, char *argv[]) 
@@ -147,12 +162,17 @@ int main(int argc, char *argv[])
 	}
 	i=0;
 	float totalData=0.0;
+	float totalResTime=0.0;
 	//Stats Calculations
 	while(i<numProc)
 	{
-		totalData+=bytesRead[i];
+		totalData+=reqFulfilled[i];
+		totalResTime += responseTime[i];
 		i++;
 	}
-	printf("ThroughPut(req/s): %f\n",totalData/atoi(argv[4]));	
 
+	totalResTime /= (atoi(argv[3]));
+
+	printf("throughput = %f (req/s)\n",totalData/atoi(argv[4]));	
+	printf("average response time = %f sec\n", totalResTime);	
 }
