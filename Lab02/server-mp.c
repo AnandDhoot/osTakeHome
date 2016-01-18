@@ -21,8 +21,6 @@ static void  chld_reap_handler(int no)
 		PID = waitpid(-1,0,WNOHANG);
 	} 
 	while ( PID != -1 );
-
-
 	signal(SIGCHLD,chld_reap_handler);
 }
 void childprocessing (int sock) 
@@ -36,16 +34,13 @@ void childprocessing (int sock)
 	 
 	if (n < 0) 
 	{
-		perror("ERROR reading from socket");
+		fprintf(stderr, "ERROR reading from socket");
 		exit(1);
 	}
 	string req(buffer);
 	//strip get and /n
 	// printf("Req %s", req.c_str());
 	req=req.erase(0,4);
-	if(req.back()=='\n')
-		req=req.substr(0,14);
-		// req=req.substr(0,req.length()-1);
 	printf("%s %d\n",req.c_str(), count);
 	//Fetch File from disk and send
 
@@ -135,7 +130,7 @@ int main( int argc, char *argv[] )
 	
 		if (new_socket < 0) 
 		{
-			perror("ERROR on accept");
+			fprintf(stderr, "ERROR on accept");
 			exit(1);
 		}
 		
@@ -146,7 +141,7 @@ int main( int argc, char *argv[] )
 	
 		if (pid < 0) 
 		{
-			perror("ERROR on fork");
+			fprintf(stderr, "ERROR on fork");
 			return 1;
 		}
 		
