@@ -1,0 +1,33 @@
+1
+Done!
+throughput = 5.482388 (req/s)
+average response time = 0.179209 sec
+3
+Done!
+throughput = 5.608787 (req/s)
+average response time = 0.533454 sec
+5
+Done!
+throughput = 5.608384 (req/s)
+average response time = 0.888872 sec
+10
+Done!
+throughput = 5.609767 (req/s)
+average response time = 1.775965 sec
+12
+Done!
+throughput = 5.609906 (req/s)
+average response time = 2.129571 sec
+15
+Done!
+throughput = 5.610096 (req/s)
+average response time = 2.668097 sec
+20
+Done!
+throughput = 5.610201 (req/s)
+average response time = 3.560214 sec
+25
+Done!
+throughput = 5.610069 (req/s)
+average response time = 4.450636 sec
+

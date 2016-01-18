@@ -7,7 +7,7 @@
 #include <sys/time.h>
 #include <sys/types.h>
 
-#define NUM_FILES 500
+#define NUM_FILES 5000
 
 char **glob;
 int temp = 0;
@@ -67,10 +67,10 @@ void fxn(void* a)
 		if(strcmp("random", glob[6]) == 0)
 			random = 1;
 
-		char str[50] = "get /tmp/files/foo1.txt";
+		char str[50] = "get files/foo1.txt";
 
 		if(random == 1)
-			sprintf(str, "get /tmp/files/foo%d.txt", r);
+			sprintf(str, "get files/foo%d.txt", r);
 
 
 		struct timeval tim;
