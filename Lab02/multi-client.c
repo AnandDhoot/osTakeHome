@@ -177,7 +177,7 @@ int main(int argc, char *argv[])
 	totalResTime /= (atoi(argv[3]));
 		gettimeofday(&tim, NULL);
 		double reqEnd = tim.tv_sec + (tim.tv_usec/1000000.0);
-	printf("Done!");
+	printf("Done!\n");
 	printf("throughput = %f (req/s)\n",totalData/(reqEnd-reqStart));	
 	printf("average response time = %f sec\n", totalResTime);	
 }
