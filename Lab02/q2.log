@@ -1,32 +1,8 @@
-1
-Done!
-throughput = 4.998029 (req/s)
-average response time = 0.199863 sec
-5
-Done!
-throughput = 5.526630 (req/s)
-average response time = 0.902773 sec
-10
-Done!
-throughput = 5.546738 (req/s)
-average response time = 1.793461 sec
-12
-Done!
-throughput = 5.572620 (req/s)
-average response time = 2.131495 sec
-15
-Done!
-throughput = 5.588456 (req/s)
-average response time = 2.669858 sec
-20
-Done!
-throughput = 5.597063 (req/s)
-average response time = 3.532707 sec
-25
-Done!
-throughput = 5.600922 (req/s)
-average response time = 4.408224 sec
-40
-Done!
-throughput = 5.601994 (req/s)
-average response time = 6.907237 sec
+1	4.998029	0.199863
+5	5.526630	0.902773
+10	5.546738	1.793461
+12	5.572620	2.131495
+15	5.588456	2.669858
+20	5.597063	3.532707
+25	5.600922	4.408224
+40	5.601994	6.907237
