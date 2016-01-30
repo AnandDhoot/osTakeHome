@@ -1,0 +1,32 @@
+Q1
+parsetree -p --highlight-pid <pid of shell> highleted nodes are ans
+
+pid - 5848
+systemd(1) -lightdm(830) - lightdm(1157) - upstart(1215)
+
+
+Q2
+cd-shell
+ls-exec
+history-shell
+ps-exec
+
+
+Q3 
+Using proc/pid/fd/
+then readlink 0/1/2 tells is what the symbolic link of the fd's points too.
+0- /dev/pts/5
+1-/tmp/tmp.txt  (This is the ouput redirection)
+2-/dev/pts/5
+
+Q4
+
+
+{Send/recieve in multiples of 512 bytes currenty}
+Q5
+Done
+
+Q6 
+Done
+
+Q7- Done
