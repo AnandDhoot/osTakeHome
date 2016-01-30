@@ -1,20 +1,13 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <signal.h>
+
 #include <netdb.h>
 #include <netinet/in.h>
 
 #include <string.h>
 
-int totalBytes=0;
-void sig_handler(){
-
-printf("Received SIGINT; downloaded %d bytes so far.\n",totalBytes );
-exit(0);
-}
 int main(int argc, char *argv[]) {
 
-	signal(SIGINT,sig_handler);
    int sockfd, portno, n;
    struct sockaddr_in serv_addr;
    struct hostent *server;
@@ -73,7 +66,6 @@ int main(int argc, char *argv[]) {
     {
        // printf("Bytes received %d\n",bytesReceived);    
         // recvBuff[n] = 0;
-        totalBytes+=bytesReceived;
         if(argv[4][0]=='d')
         	printf("%.*s",bytesReceived,recvBuff);
 

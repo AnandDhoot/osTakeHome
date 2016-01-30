@@ -2,7 +2,7 @@ Q1
 parsetree -p --highlight-pid <pid of shell> highleted nodes are ans
 
 pid - 5848
-systemd(1) -lightdm(830) - lightdm(1157) - upstart(1215)
+systemd(1) -lightdm(830) - lightdm(1157) - upstart(1215)- gnome-terminal
 
 
 Q2
@@ -20,6 +20,13 @@ then readlink 0/1/2 tells is what the symbolic link of the fd's points too.
 2-/dev/pts/5
 
 Q4
+systemd(1) -lightdm(830) - lightdm(1157) - upstart(1215) -gnome-terminal(2239)- bash(2684) - a.out(2873) and grep(2874
+
+Using below two commands we see that both the stdout of a.out and the stdin of grep now point to a pipe with the same id.
+This ensures the output from cpuprint goes directly to grep.
+
+readlink /proc/2873/fd/1  pipe:[44132]
+readlink /proc/2874/fd/0  pipe:[44132]
 
 
 {Send/recieve in multiples of 512 bytes currenty}
