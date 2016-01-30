@@ -79,8 +79,6 @@ int main( int argc, char *argv[] )
 	int main_socket , new_socket,sd;// to store various socket descriptors
 
 	int pid; // pid of forked childs
-
-	char buffer[1025];  //data buffer of 1K
 	
 
 	if (argc !=2) 

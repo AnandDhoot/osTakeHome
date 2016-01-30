@@ -75,8 +75,8 @@ int main(int argc, char *argv[]) {
         // recvBuff[n] = 0;
         totalBytes+=bytesReceived;
         if(argv[4][0]=='d')
-        	printf("%s\n",recvBuff);
-       // printf("%s \n", recvBuff);
+        	printf("%.*s",bytesReceived,recvBuff);
+
     }
 
     if(bytesReceived < 0)
