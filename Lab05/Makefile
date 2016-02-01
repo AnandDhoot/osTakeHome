@@ -11,3 +11,5 @@ all:
 clean:
 	@/bin/echo -e "$(CL_STRING)"
 	@rm client-shell *~ *.o
+run: all
+	./client-shell
