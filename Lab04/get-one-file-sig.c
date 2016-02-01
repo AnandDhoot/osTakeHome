@@ -9,7 +9,7 @@
 int totalBytes=0;
 void sig_handler(){
 
-printf("Received SIGINT; downloaded %d bytes so far.\n",totalBytes );
+printf("\nReceived SIGINT; downloaded %d bytes so far.\n",totalBytes );
 exit(0);
 }
 int main(int argc, char *argv[]) {
