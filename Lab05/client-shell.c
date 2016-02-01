@@ -20,13 +20,19 @@ void sig_segfault(int w)
 		// exit(0);
 }
 
+void sig_chld_handler(int x)
+{
+	printf("File download completed in background process\n");
+	signal(SIGCHLD, SIG_DFL);
+}
+
 void forker(vector<string> tokens)
 {
 	if(tokens[0] == "getfl")
 	{
 		if(tokens.size() == 2)
 		{
-			execl("/users/ug13/ananddhoot/Desktop/333/Lab04/get-one-file", "get-one-file", 
+			execl("../Lab04/get-one-file-sig", "get-one-file-sig", 
 				tokens[1].c_str(), IP.c_str(), PORT.c_str(), "display", 0);
 		}
 		else if(tokens.size() == 4 && tokens[2] == ">")
@@ -36,7 +42,7 @@ void forker(vector<string> tokens)
 				fprintf(stderr, "Error opening file to write");
 				exit(1);
 			}
-			execl("/users/ug13/ananddhoot/Desktop/333/Lab04/get-one-file", "get-one-file", 
+			execl("../Lab04/get-one-file-sig", "get-one-file-sig", 
 				tokens[1].c_str(), IP.c_str(), PORT.c_str(), "display", 0);
 			fclose(stdout);
 		}
@@ -49,34 +55,44 @@ void forker(vector<string> tokens)
 	}
 	else if(tokens[0] == "getsq")
 	{
-		// if(tokens.size() <= 1)
-		// 	fprintf(stderr, "Atleast one file name must be provided with getsq\n");
-		// for(int i=1; i<tokens.size(); i++)
-		// {
-		// 	execl("/users/ug13/ananddhoot/Desktop/333/Lab04/get-one-file", "get-one-file", 
-		// 		tokens[i].c_str(), IP.c_str(), PORT.c_str(), "display", 0);
-		// }
-		printf("Getsq command\n");
+		if(tokens.size() <= 1)
+			fprintf(stderr, "Atleast one file name must be provided with getsq\n");
+		for(int i=1; i<tokens.size(); i++)
+		{
+			int pid1 = fork();
+			if(pid1 == 0)
+			{
+				execl("../Lab04/get-one-file-sig", "get-one-file-sig", 
+				tokens[i].c_str(), IP.c_str(), PORT.c_str(), "nodisplay", 0);
+			}
+			else
+			{
+				waitpid(pid1, NULL, 0);
+			}
+		}
 	}
 	else if(tokens[0] == "getpl")
-	{
-		printf("Get files parallely command\n");
-	}
-	else if(tokens[0] == "getbg")
-	{
-		printf("Get file in background command\n");
-	}
-	else if(tokens[0] == "ls")
-	{
-		execl("/bin/ls", "ls", 0);
-	}
-	else if(tokens[0] == "cat")
-	{
-		execl("/bin/cat", "cat", tokens[1].c_str(), 0);
-	}
-	else if(tokens[0] == "echo")
-	{
-		printf("Echo command\n");
+	{	
+		if(tokens.size() <= 1)
+		{
+			fprintf(stderr, "Atleast one file name must be provided with getpl\n");
+			exit(1);	
+		}
+
+		vector<int> pidArr(tokens.size(), 0);
+		for(int i=1; i<tokens.size(); i++)
+		{
+			pidArr[i] = fork();
+			if(pidArr[i] == 0)
+			{
+				execl("../Lab04/get-one-file-sig", "get-one-file-sig", 
+					tokens[i].c_str(), IP.c_str(), PORT.c_str(), "display", 0);
+			}
+		}
+		for (int i = 1; i < tokens.size(); i++)
+		{
+			waitpid(pidArr[i], NULL, 0);
+		}
 	}
 	else
 	{
@@ -133,6 +149,32 @@ int main(void)
 				IP = tokens[1];
 				PORT = tokens[2];
 			}
+		}
+		else if(tokens[0] == "getbg")
+		{
+			signal(SIGCHLD, sig_chld_handler);
+			if(tokens.size() != 2)
+			{
+				fprintf(stderr, "Exactly two arguments expected with getbg\n");
+				exit(1);	
+			}
+			int pid = fork();
+
+			if(pid == 0)
+				execl("../Lab04/get-one-file-sig", "get-one-file-sig", 
+					tokens[1].c_str(), IP.c_str(), PORT.c_str(), "nodisplay", 0);
+		}
+		else if(tokens[0] == "ls")
+		{
+			execl("/bin/ls", "ls", 0);
+		}
+		else if(tokens[0] == "cat")
+		{
+			execl("/bin/cat", "cat", tokens[1].c_str(), 0);
+		}
+		else if(tokens[0] == "echo")
+		{
+			printf("Echo command\n");
 		}
 		else if(tokens[0].compare("exit") == 0)
 		{
