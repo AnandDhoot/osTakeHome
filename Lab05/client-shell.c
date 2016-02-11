@@ -9,22 +9,33 @@
 #include <unistd.h>
 #include "make-tokens.h"
 #include <vector>
+#include <algorithm>
 
 using namespace std;
 
 string IP = "127.0.0.1";
 string PORT = "5000";
 
-int backPGID = 10000000;
+vector<int> backPIDs;
 
 void sig_segfault(int w)
 {
-		// exit(0);
+	// exit(0);
 }
 
 void sig_chld_handler(int x)
 {
 	printf("File download completed in background process\n");
+	pid_t id;
+	do  
+	{
+		id = waitpid(-1,0,WNOHANG);
+		printf("%d\n", id);
+		if(id > 0)
+			backPIDs.erase(find(backPIDs.begin(), backPIDs.end(), id));.
+	}
+	while ( id > 0 );
+	signal(SIGCHLD, sig_chld_handler);
 }
 
 void forground(vector<string> tokens, char* args[])
@@ -224,13 +235,15 @@ int main(void)
 			int pid = fork();
 
 			if(pid == 0)
+			{
+
 				execl("../Lab04/get-one-file-sig", "get-one-file-sig", 
-					tokens[1].c_str(), IP.c_str(), PORT.c_str(), "display", 0);
+					tokens[1].c_str(), IP.c_str(), PORT.c_str(), "nodisplay", 0);
+			}
 			else
 			{
-				if(pid < backPGID)
-					backPGID = pid;
-				setpgid(pid, backPGID);
+				setpgid(pid, 0);
+				backPIDs.push_back(pid);
 			}
 		}
 		else if(tokens[0].compare("exit") == 0)
@@ -239,8 +252,8 @@ int main(void)
 				fprintf(stderr, "No arguments expected with exit\n");
 			else
 			{
-				killpg(backPGID, SIGINT);
-				backPGID = 10000000;
+				for(int i=0; i<backPIDs.size(); i++)
+					kill(backPIDs[i], SIGINT);
 
 				break;
 			}
@@ -256,12 +269,11 @@ int main(void)
 			}
 			else
 			{
-			
 				waitpid(pid, NULL, 0);
 				signal(SIGCHLD,sig_chld_handler);
 			}
 		}
-		 
+		
 		// Freeing the allocated memory
 		for(int k=0;k<=tokens.size();k++)
 					free(a[k]);
