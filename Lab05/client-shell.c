@@ -17,7 +17,7 @@ string PORT = "5000";
 
 void sig_segfault(int w)
 {
-		// exit(0);
+		// exit(0);	
 }
 
 void sig_chld_handler(int x)
@@ -30,13 +30,13 @@ void forker(vector<string> tokens)
 {
 
 	if(tokens[0] == "ls")
-		{
-			execl("/bin/ls", "ls", 0);
-		}
+	{
+		execl("/bin/ls", "ls", 0);
+	}
 	else if(tokens[0] == "cat")
-		{
-			execl("/bin/cat", "cat", tokens[1].c_str(), 0);
-		}
+	{
+		execl("/bin/cat", "cat", tokens[1].c_str(), 0);
+	}
 	else if(tokens[0] == "getfl")
 	{
 		if(tokens.size() == 2)
@@ -45,7 +45,7 @@ void forker(vector<string> tokens)
 				tokens[1].c_str(), IP.c_str(), PORT.c_str(), "display", 0);
 		}
 		else if(tokens.size() == 4 && tokens[2] == ">")
-		{
+		{	
 			if(freopen(tokens[3].c_str(), "w+", stdout) < 0)
 			{
 				fprintf(stderr, "Error opening file to write");
@@ -58,54 +58,43 @@ void forker(vector<string> tokens)
 		else if(tokens.size() >= 4 && tokens[2] == "|")
 		{
 			int pipefd[2];
-			  pipe(pipefd);
-			      char*  a[10];
-			      int i;
-			      for(i=3;i<tokens.size();i++)
-			      	a[i-3]=strdup(tokens[i].c_str());
-			      a[i-3]= NULL;
-			  int pid = fork();
+			pipe(pipefd);
+			char* a[64];
+			int i;
+			for(i=3;i<tokens.size();i++)
+				a[i-3]=strdup(tokens[i].c_str());
+			a[i-3] = NULL;
+			int pid = fork();
 
-			  if (pid == 0)
-			    {
-			      // child
-			      // replace standard input with input part of pipe
+			if (pid == 0)
+			{
+				dup2(pipefd[0], 0);
+				close(pipefd[1]);
 
-			      dup2(pipefd[0], 0);
-
-			      // close unused hald of pipe
-
-			      close(pipefd[1]);
-
-			      // execute
-			      string s = "/bin/";
-			      s+=tokens[3];
-
-			      execvp(s.c_str(), a);
-			    }
-			  else
-			    {
-			      // parent
-			      // replace standard output with output part of pipe
-			    	int x= fork();
-			    	if(x==0){
-
-						      dup2(pipefd[1], 1);
-
-						      // close unused unput half of pipe
-
-						      close(pipefd[0]);
-
-						      // execute
-
-						    execl("../Lab04/get-one-file-sig", "get-one-file-sig", 
-							tokens[1].c_str(), IP.c_str(), PORT.c_str(), "display", 0);
+				string s = "/bin/";
+				s+=tokens[3];
+				execvp(s.c_str(), a);
+			}
+			else
+			{
+				int x = fork();
+				if(x == 0)
+				{
+					dup2(pipefd[1], 1);
+					close(pipefd[0]);
+					execl("../Lab04/get-one-file-sig", "get-one-file-sig", 
+					tokens[1].c_str(), IP.c_str(), PORT.c_str(), "display", 0);
 				}
-				else{
-							for(int k=0;k<=i-3;k++)
-								free(a[k]);
-							waitpid(x, NULL, 0);
-			    }
+				else
+				{
+					close(pipefd[0]);
+					close(pipefd[1]);
+
+					for(int k=0;k<=i-3;k++)
+						free(a[k]);
+					waitpid(x, NULL, 0);
+					waitpid(pid, NULL, 0);
+				}
 			}
 		}
 		else
@@ -178,7 +167,7 @@ int main(void)
 		for(i=0;tokensC[i]!=NULL;i++)
 		{
 			string str = (string) tokensC[i];
- 			tokens.push_back(str);
+			tokens.push_back(str);
 		}
 
 		if(tokens[0].compare("cd") == 0)
@@ -249,7 +238,7 @@ int main(void)
 		// Freeing the allocated memory	
 		for(i=0;tokensC[i]!=NULL;i++)
 		{
- 			free(tokensC[i]);
+			free(tokensC[i]);
 		}
 		free(tokensC);
 	}
