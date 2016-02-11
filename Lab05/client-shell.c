@@ -15,6 +15,8 @@ using namespace std;
 string IP = "127.0.0.1";
 string PORT = "5000";
 
+int backPGID = 10000000;
+
 void sig_segfault(int w)
 {
 		// exit(0);
@@ -228,13 +230,24 @@ int main(void)
 			if(pid == 0)
 				execl("../Lab04/get-one-file-sig", "get-one-file-sig", 
 					tokens[1].c_str(), IP.c_str(), PORT.c_str(), "nodisplay", 0);
+			else
+			{
+				if(pid < backPGID)
+					backPGID = pid;
+				setpgid(pid, backPGID);
+			}
 		}
 		else if(tokens[0].compare("exit") == 0)
 		{
 			if(tokens.size() != 1)
 				fprintf(stderr, "No arguments expected with exit\n");
 			else
+			{
+				killpg(backPGID, SIGINT);
+				backPGID = 10000000;
+
 				break;
+			}
 		}
 		else
 		{
