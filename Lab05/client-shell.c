@@ -25,10 +25,9 @@ void sig_segfault(int w)
 void sig_chld_handler(int x)
 {
 	printf("File download completed in background process\n");
-	signal(SIGCHLD, SIG_DFL);
 }
 
-void forker(vector<string> tokens, char* args[])
+void forground(vector<string> tokens, char* args[])
 {
 	string ex ="/bin/";
 	ex+=tokens[0];
@@ -63,6 +62,7 @@ void forker(vector<string> tokens, char* args[])
 			for(i=3;i<tokens.size();i++)
 				a[i-3]=strdup(tokens[i].c_str());
 			a[i-3]= NULL;
+
 			int pid = fork();
 
 			if (pid == 0)
@@ -153,6 +153,7 @@ void forker(vector<string> tokens, char* args[])
 	}
 	else
 	{
+		printf("%s\n",tokens[0].c_str() );
 		fprintf(stderr, "Incorrect command.\n");
 	}
 	exit(1);
@@ -164,9 +165,10 @@ int main(void)
 	char **tokensC;              
 	int i;
 	signal(SIGINT, sig_segfault);
-
+	signal(SIGCHLD,sig_chld_handler);
 	while (1) 
 	{
+		//sigprocmask(SIG_BLOCK, &signal_set, NULL);
 		printf("Hello> ");     
 		bzero(line, MAX_INPUT_SIZE);
 		gets(line);
@@ -214,7 +216,6 @@ int main(void)
 		}
 		else if(tokens[0] == "getbg")
 		{
-			signal(SIGCHLD, sig_chld_handler);
 			if(tokens.size() != 2)
 			{
 				fprintf(stderr, "Exactly two arguments expected with getbg\n");
@@ -224,7 +225,7 @@ int main(void)
 
 			if(pid == 0)
 				execl("../Lab04/get-one-file-sig", "get-one-file-sig", 
-					tokens[1].c_str(), IP.c_str(), PORT.c_str(), "nodisplay", 0);
+					tokens[1].c_str(), IP.c_str(), PORT.c_str(), "display", 0);
 			else
 			{
 				if(pid < backPGID)
@@ -246,15 +247,18 @@ int main(void)
 		}
 		else
 		{
+			signal(SIGCHLD,sig_segfault);
 			int pid = fork();
 			if(pid == 0)
 			{
 				signal(SIGINT,SIG_DFL);
-				forker(tokens,a);
+				forground(tokens,a);
 			}
 			else
 			{
+			
 				waitpid(pid, NULL, 0);
+				signal(SIGCHLD,sig_chld_handler);
 			}
 		}
 		 
@@ -265,7 +269,7 @@ int main(void)
 		{
 			free(tokensC[i]);
 		}
-		free(tokensC);
+		free(tokensC); 
 	}
 		 
 	return 0;
