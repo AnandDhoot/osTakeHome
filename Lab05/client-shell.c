@@ -28,7 +28,16 @@ void sig_chld_handler(int x)
 
 void forker(vector<string> tokens)
 {
-	if(tokens[0] == "getfl")
+
+	if(tokens[0] == "ls")
+		{
+			execl("/bin/ls", "ls", 0);
+		}
+	else if(tokens[0] == "cat")
+		{
+			execl("/bin/cat", "cat", tokens[1].c_str(), 0);
+		}
+	else if(tokens[0] == "getfl")
 	{
 		if(tokens.size() == 2)
 		{
@@ -46,9 +55,58 @@ void forker(vector<string> tokens)
 				tokens[1].c_str(), IP.c_str(), PORT.c_str(), "display", 0);
 			fclose(stdout);
 		}
-		else if(tokens.size() == 4 && tokens[2] == "|")
+		else if(tokens.size() >= 4 && tokens[2] == "|")
 		{
-			printf("Pipe\n");
+			int pipefd[2];
+			  pipe(pipefd);
+			      char*  a[10];
+			      int i;
+			      for(i=3;i<tokens.size();i++)
+			      	a[i-3]=strdup(tokens[i].c_str());
+			      a[i-3]= NULL;
+			  int pid = fork();
+
+			  if (pid == 0)
+			    {
+			      // child
+			      // replace standard input with input part of pipe
+
+			      dup2(pipefd[0], 0);
+
+			      // close unused hald of pipe
+
+			      close(pipefd[1]);
+
+			      // execute
+			      string s = "/bin/";
+			      s+=tokens[3];
+
+			      execvp(s.c_str(), a);
+			    }
+			  else
+			    {
+			      // parent
+			      // replace standard output with output part of pipe
+			    	int x= fork();
+			    	if(x==0){
+
+						      dup2(pipefd[1], 1);
+
+						      // close unused unput half of pipe
+
+						      close(pipefd[0]);
+
+						      // execute
+
+						    execl("../Lab04/get-one-file-sig", "get-one-file-sig", 
+							tokens[1].c_str(), IP.c_str(), PORT.c_str(), "display", 0);
+				}
+				else{
+							for(int k=0;k<=i-3;k++)
+								free(a[k]);
+							waitpid(x, NULL, 0);
+			    }
+			}
 		}
 		else
 			fprintf(stderr, "Incorrect number of arguments with getfl\n");
@@ -163,14 +221,6 @@ int main(void)
 			if(pid == 0)
 				execl("../Lab04/get-one-file-sig", "get-one-file-sig", 
 					tokens[1].c_str(), IP.c_str(), PORT.c_str(), "nodisplay", 0);
-		}
-		else if(tokens[0] == "ls")
-		{
-			execl("/bin/ls", "ls", 0);
-		}
-		else if(tokens[0] == "cat")
-		{
-			execl("/bin/cat", "cat", tokens[1].c_str(), 0);
 		}
 		else if(tokens[0] == "echo")
 		{
