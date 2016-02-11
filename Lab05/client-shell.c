@@ -14,7 +14,7 @@ using namespace std;
 
 string IP = "127.0.0.1";
 string PORT = "5000";
-
+char* args[64];
 void sig_segfault(int w)
 {
 		// exit(0);	
@@ -28,14 +28,11 @@ void sig_chld_handler(int x)
 
 void forker(vector<string> tokens)
 {
-
-	if(tokens[0] == "ls")
+	string ex ="/bin/";
+	ex+=tokens[0];
+	if( access( ex.c_str(), F_OK ) != -1 )
 	{
-		execl("/bin/ls", "ls", 0);
-	}
-	else if(tokens[0] == "cat")
-	{
-		execl("/bin/cat", "cat", tokens[1].c_str(), 0);
+		execvp(ex.c_str(),args);
 	}
 	else if(tokens[0] == "getfl")
 	{
@@ -169,6 +166,10 @@ int main(void)
 			string str = (string) tokensC[i];
 			tokens.push_back(str);
 		}
+		int i;
+		for(i=0;i<tokens.size();i++)
+			args[i]=strdup(tokens[i].c_str());
+		args[i]= NULL;
 
 		if(tokens[0].compare("cd") == 0)
 		{
@@ -210,10 +211,6 @@ int main(void)
 			if(pid == 0)
 				execl("../Lab04/get-one-file-sig", "get-one-file-sig", 
 					tokens[1].c_str(), IP.c_str(), PORT.c_str(), "nodisplay", 0);
-		}
-		else if(tokens[0] == "echo")
-		{
-			printf("Echo command\n");
 		}
 		else if(tokens[0].compare("exit") == 0)
 		{
