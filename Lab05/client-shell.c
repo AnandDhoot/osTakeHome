@@ -30,12 +30,12 @@ void sig_chld_handler(int x)
 
 void forker(vector<string> tokens, char* args[])
 {
-		string ex ="/bin/";
-		ex+=tokens[0];
-		if( access( ex.c_str(), F_OK ) != -1 )
-		{
-			execvp(ex.c_str(),args);
-		}
+	string ex ="/bin/";
+	ex+=tokens[0];
+	if( access( ex.c_str(), F_OK ) != -1 )
+	{
+		execvp(ex.c_str(),args);
+	}
 	else if(tokens[0] == "getfl")
 	{
 		if(tokens.size() == 2)
@@ -57,60 +57,54 @@ void forker(vector<string> tokens, char* args[])
 		else if(tokens.size() >= 4 && tokens[2] == "|")
 		{
 			int pipefd[2];
-			  pipe(pipefd);
-			      char*  a[10];
-			      int i;
-			      for(i=3;i<tokens.size();i++)
-			      	a[i-3]=strdup(tokens[i].c_str());
-			      a[i-3]= NULL;
-			  int pid = fork();
+			pipe(pipefd);
+			char*  a[10];
+			int i;
+			for(i=3;i<tokens.size();i++)
+				a[i-3]=strdup(tokens[i].c_str());
+			a[i-3]= NULL;
+			int pid = fork();
 
-			  if (pid == 0)
-			    {
-			      // child
-			      // replace standard input with input part of pipe
+			if (pid == 0)
+			{
+				dup2(pipefd[0], 0);
+				close(pipefd[1]);
+				
+				string s = "/bin/";
+  				s+=tokens[3];
 
-			      dup2(pipefd[0], 0);
-
-			      // close unused hald of pipe
-
-			      close(pipefd[1]);
-
-			      // execute
-			      string s = "/bin/";
-			      s+=tokens[3];
-				if( access( s.c_str(), F_OK ) != -1 )
-					{
-						execvp(s.c_str(),a);
-					}
-			      else{
-			      	printf("%s\n","Wrong command afer pipe" );
-			      	exit(0);
-			      }
-			    }
-			  else
-			    {
-			      // parent
-			      // replace standard output with output part of pipe
-			    	int x= fork();
-			    	if(x==0){
-
-						      dup2(pipefd[1], 1);
-
-						      // close unused unput half of pipe
-
-						      close(pipefd[0]);
-
-						      // execute
-
-						    execl("../Lab04/get-one-file-sig", "get-one-file-sig", 
-							tokens[1].c_str(), IP.c_str(), PORT.c_str(), "display", 0);
+				if(access( s.c_str(), F_OK ) != -1)
+				{
+					execvp(s.c_str(),a);
 				}
-				else{
-							for(int k=0;k<=i-3;k++)
-								free(a[k]);
-							waitpid(x, NULL, 0);
-			    }
+				else
+				{
+					printf("%s\n","Wrong command afer pipe" );
+					exit(0);
+				}
+			}
+			else
+			{
+				int x= fork();
+				if(x==0)
+				{
+					dup2(pipefd[1], 1);
+					close(pipefd[0]);
+
+					execl("../Lab04/get-one-file-sig", "get-one-file-sig", 
+						tokens[1].c_str(), IP.c_str(), PORT.c_str(), "display", 0);
+				}
+				else
+				{
+					close(pipefd[0]);
+					close(pipefd[1]);
+
+					for(int k=0;k<=i-3;k++)
+						free(a[k]);
+
+					waitpid(x, NULL, 0);
+					waitpid(pid, NULL, 0);
+				}
 			}
 		}
 		else
@@ -183,12 +177,13 @@ int main(void)
 		for(i=0;tokensC[i]!=NULL;i++)
 		{
 			string str = (string) tokensC[i];
- 			tokens.push_back(str);
+			tokens.push_back(str);
 		}
-			      char*  a[64];
-			      for(i=0;i<tokens.size();i++)
-			      a[i]=strdup(tokens[i].c_str());
-			      a[i]= NULL;
+		
+		char*  a[64];
+		for(i=0;i<tokens.size();i++)
+		a[i]=strdup(tokens[i].c_str());
+		a[i]= NULL;
 
 		if(tokens[0].compare("cd") == 0)
 		{
@@ -268,7 +263,7 @@ int main(void)
 					free(a[k]);
 		for(i=0;tokensC[i]!=NULL;i++)
 		{
- 			free(tokensC[i]);
+			free(tokensC[i]);
 		}
 		free(tokensC);
 	}
