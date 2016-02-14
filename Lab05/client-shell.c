@@ -25,14 +25,15 @@ void sig_segfault(int w)
 
 void sig_chld_handler(int x)
 {
-	printf("File download completed in background process\n");
 	pid_t id;
 	do  
 	{
 		id = waitpid(-1,0,WNOHANG);
-		printf("%d\n", id);
+		//printf("%d\n", id);
+		if(find(backPIDs.begin(), backPIDs.end(), id)!=backPIDs.end())
+			printf("File download completed in background process\n");
 		if(id > 0)
-			backPIDs.erase(find(backPIDs.begin(), backPIDs.end(), id));.
+			backPIDs.erase(find(backPIDs.begin(), backPIDs.end(), id));
 	}
 	while ( id > 0 );
 	signal(SIGCHLD, sig_chld_handler);
@@ -50,7 +51,7 @@ void forground(vector<string> tokens, char* args[])
 	{
 		if(tokens.size() == 2)
 		{
-			execl("../Lab04/get-one-file-sig", "get-one-file-sig", 
+			execl("get-one-file-sig", "get-one-file-sig", 
 				tokens[1].c_str(), IP.c_str(), PORT.c_str(), "display", 0);
 		}
 		else if(tokens.size() == 4 && tokens[2] == ">")
@@ -60,7 +61,7 @@ void forground(vector<string> tokens, char* args[])
 				fprintf(stderr, "Error opening file to write");
 				exit(1);
 			}
-			execl("../Lab04/get-one-file-sig", "get-one-file-sig", 
+			execl("get-one-file-sig", "get-one-file-sig", 
 				tokens[1].c_str(), IP.c_str(), PORT.c_str(), "display", 0);
 			fclose(stdout);
 		}
@@ -102,7 +103,7 @@ void forground(vector<string> tokens, char* args[])
 					dup2(pipefd[1], 1);
 					close(pipefd[0]);
 
-					execl("../Lab04/get-one-file-sig", "get-one-file-sig", 
+					execl("get-one-file-sig", "get-one-file-sig", 
 						tokens[1].c_str(), IP.c_str(), PORT.c_str(), "display", 0);
 				}
 				else
@@ -130,7 +131,7 @@ void forground(vector<string> tokens, char* args[])
 			int pid1 = fork();
 			if(pid1 == 0)
 			{
-				execl("../Lab04/get-one-file-sig", "get-one-file-sig", 
+				execl("get-one-file-sig", "get-one-file-sig", 
 				tokens[i].c_str(), IP.c_str(), PORT.c_str(), "nodisplay", 0);
 			}
 			else
@@ -153,8 +154,8 @@ void forground(vector<string> tokens, char* args[])
 			pidArr[i] = fork();
 			if(pidArr[i] == 0)
 			{
-				execl("../Lab04/get-one-file-sig", "get-one-file-sig", 
-					tokens[i].c_str(), IP.c_str(), PORT.c_str(), "display", 0);
+				execl("get-one-file-sig", "get-one-file-sig", 
+					tokens[i].c_str(), IP.c_str(), PORT.c_str(), "nodisplay", 0);
 			}
 		}
 		for (int i = 1; i < tokens.size(); i++)
@@ -237,7 +238,7 @@ int main(void)
 			if(pid == 0)
 			{
 
-				execl("../Lab04/get-one-file-sig", "get-one-file-sig", 
+				execl("get-one-file-sig", "get-one-file-sig", 
 					tokens[1].c_str(), IP.c_str(), PORT.c_str(), "nodisplay", 0);
 			}
 			else
@@ -255,12 +256,20 @@ int main(void)
 				for(int i=0; i<backPIDs.size(); i++)
 					kill(backPIDs[i], SIGINT);
 
+				for(int k=0;k<=tokens.size();k++)
+					free(a[k]);
+				for(i=0;tokensC[i]!=NULL;i++)
+				{
+					free(tokensC[i]);
+				}
+				free(tokensC); 
+
 				break;
 			}
 		}
 		else
 		{
-			signal(SIGCHLD,sig_segfault);
+			//signal(SIGCHLD,sig_segfault);
 			int pid = fork();
 			if(pid == 0)
 			{
@@ -270,7 +279,7 @@ int main(void)
 			else
 			{
 				waitpid(pid, NULL, 0);
-				signal(SIGCHLD,sig_chld_handler);
+				//signal(SIGCHLD,sig_chld_handler);
 			}
 		}
 		
