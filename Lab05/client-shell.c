@@ -12,9 +12,9 @@
 #include <algorithm>
 
 using namespace std;
-
+int pgGlob=-1;
 string IP = "127.0.0.1";
-string PORT = "5000";
+string PORT = "5001";
 
 vector<int> backPIDs;
 
@@ -235,7 +235,16 @@ int main(void)
 			}
 			int pid = fork();
 
-			if(pid == 0)
+			if(pid == 0){
+				int x;
+				if(pgGlob==-1){
+					pgGlob=pid;
+					x=setpgid(pid,pid);
+				}
+				else{
+					x= setpgid(pid,pgGlob);
+					
+				}
 			{
 
 				execl("get-one-file-sig", "get-one-file-sig", 
@@ -251,7 +260,8 @@ int main(void)
 		{
 			if(tokens.size() != 1)
 				fprintf(stderr, "No arguments expected with exit\n");
-			else
+			else{
+				killpg(pgGlob,SIGINT);
 			{
 				for(int i=0; i<backPIDs.size(); i++)
 					kill(backPIDs[i], SIGINT);

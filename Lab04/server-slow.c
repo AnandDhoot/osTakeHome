@@ -60,7 +60,7 @@ void childprocessing (int sock)
 		/* If read was success, send data. */
 		if(nread > 0){
 			write(sock, buffer, nread);
-			sleep(1);
+			sleep(10);
 		}
 		// file finished
 		if (nread < 512)
