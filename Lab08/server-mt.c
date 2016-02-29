@@ -12,7 +12,6 @@
 #include <arpa/inet.h>
 #include <queue>
 #include <pthread.h>
-#include <condition_variable>
 
 using namespace std;
 static int count = 0;
@@ -22,10 +21,18 @@ pthread_cond_t can_accept_conn;
 pthread_cond_t can_process_conn;
 
 int NUM_WORKERS = 10;
-int QUEUE_SIZE = 10;
+int MAX_QUEUE_SIZE = 10;
 int PORT_NUM = 5000;
 
 queue<int> req;
+
+// void* printer(void* sock1)
+// {
+// 	while(1)
+// 	{
+// 		sleep(1);
+// 	}
+// }
 
 void* handleReq(void* sock1) 
 {
@@ -40,6 +47,7 @@ void* handleReq(void* sock1)
 		req.pop();
 		pthread_cond_signal(&can_accept_conn);
 		pthread_mutex_unlock(&mtx);
+
 
 		int n;
 		char buffer[512];
@@ -57,6 +65,7 @@ void* handleReq(void* sock1)
 		//strip get and /n
 		// printf("Req %s", req.c_str());
 		req=req.erase(0,4);
+		count ++;
 		printf("%s %d\n",req.c_str(), count);
 		//Fetch File from disk and send
 
@@ -82,12 +91,13 @@ void* handleReq(void* sock1)
 			if (nread < 512)
 			{
 				if (ferror(fp))
-						printf("Error reading\n");
+					printf("Error reading\n");
 				break;
 			}
 		}
 		//close file
 		fclose(fp);
+		close(sock);
 	}
 }
 
@@ -105,8 +115,9 @@ int main( int argc, char *argv[] )
 
 	PORT_NUM = stoi(argv[1]);
 	NUM_WORKERS = stoi(argv[2]);
-	QUEUE_SIZE = stoi(argv[3]);
+	MAX_QUEUE_SIZE = stoi(argv[3]);
 
+	cout << PORT_NUM << " " << NUM_WORKERS << " " << MAX_QUEUE_SIZE << endl;
 
 	// signal(SIGCHLD,chld_reap_handler); //Initialze signal for handling child reaping
 	struct sockaddr_in cli_addr,serv_addr; // address structs to store serv, new client, array for connected clients
@@ -130,16 +141,18 @@ int main( int argc, char *argv[] )
 		return 2;
 	}
 	
-	listen(main_socket, 150);// Listen on main socket
 
 
 	pthread_t thread[NUM_WORKERS];
+	// pthread_t thread1;
 	int i = 0;
+	// pthread_create(&thread1, NULL, printer, NULL);
 	while(i < NUM_WORKERS)
 	{
 		pthread_create(&thread[i], NULL, handleReq, NULL);
 		i++;
 	}
+	listen(main_socket, 150);// Listen on main socket
 
 	while (1) 
 	{
@@ -152,7 +165,7 @@ int main( int argc, char *argv[] )
 		}
 
 		pthread_mutex_lock(&mtx);
-		while(!(QUEUE_SIZE == 0 || req.size() < QUEUE_SIZE))
+		while(!(MAX_QUEUE_SIZE == 0 || req.size() < MAX_QUEUE_SIZE))
 		{
 			pthread_cond_wait(&can_accept_conn, &mtx);
 		}

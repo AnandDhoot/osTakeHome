@@ -45,7 +45,7 @@ void childprocessing (int sock)
 	//Fetch File from disk and send
 
 	FILE *fp = fopen(req.c_str(),"r");
-	if(fp==NULL)man 
+	if(fp==NULL)
 	{
 		printf("File open error");
 		return;   
