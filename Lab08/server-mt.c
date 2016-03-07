@@ -12,7 +12,7 @@
 #include <arpa/inet.h>
 #include <queue>
 #include <pthread.h>
-
+#include <signal.h>
 using namespace std;
 static int count = 0;
 
@@ -23,7 +23,11 @@ pthread_cond_t can_process_conn;
 int NUM_WORKERS = 10;
 int MAX_QUEUE_SIZE = 10;
 int PORT_NUM = 5000;
-
+void *handleReq(void * a);
+void sigpipe_handler(int a)
+{
+    handleReq(NULL);
+}
 queue<int> req;
 
 // void* printer(void* sock1)
@@ -59,7 +63,7 @@ void* handleReq(void* sock1)
 		if (n < 0) 
 		{
 			fprintf(stderr, "ERROR reading from socket");
-			exit(1);
+			continue;
 		}
 		string req(buffer);
 		//strip get and /n
@@ -96,6 +100,7 @@ void* handleReq(void* sock1)
 			}
 		}
 		//close file
+exit1:
 		fclose(fp);
 		close(sock);
 	}
@@ -112,7 +117,7 @@ int main( int argc, char *argv[] )
 		fprintf(stderr,"Wrong No. of arguments supplied\n");
 		return 1;
 	}
-
+	signal(SIGPIPE,sigpipe_handler);
 	PORT_NUM = stoi(argv[1]);
 	NUM_WORKERS = stoi(argv[2]);
 	MAX_QUEUE_SIZE = stoi(argv[3]);
@@ -152,18 +157,13 @@ int main( int argc, char *argv[] )
 		pthread_create(&thread[i], NULL, handleReq, NULL);
 		i++;
 	}
-	listen(main_socket, 150);// Listen on main socket
+	listen(main_socket, 5);// Listen on main socket
 
 	while (1) 
 	{
 		new_socket = accept(main_socket, (struct sockaddr *) &cli_addr, &addrlen);
 	
-		if (new_socket < 0) 
-		{
-			fprintf(stderr, "ERROR on accept");
-			exit(1);
-		}
-
+		
 		pthread_mutex_lock(&mtx);
 		while(!(MAX_QUEUE_SIZE == 0 || req.size() < MAX_QUEUE_SIZE))
 		{
