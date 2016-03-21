@@ -80,15 +80,15 @@ int main()
 
 	int fd2;
 
-	// cout << "Before-----------------------------------------\n";
-	// system(str.c_str());
+	 cout << "Before-----------------------------------------\n";
+	 system(str.c_str());
 	sync();
 	fd2 = open("/proc/sys/vm/drop_caches", O_WRONLY);
 	write(fd2, data, sizeof(char));
 	close(fd2);
 	system("cat /proc/sys/vm/drop_caches");
-	// cout << "After-----------------------------------------\n";
-	// system(str.c_str());
+	 cout << "After-----------------------------------------\n";
+	 system(str.c_str());
 
 	gettimeofday(&tim, NULL);
 	t1 = tim.tv_sec + (tim.tv_usec/1000000.0);
@@ -99,8 +99,8 @@ int main()
 		int numRead = 0;
 		while(numRead < 10000000)
 		{
-			read(fd[i], buf, 512);
-			numRead += 512;
+			read(fd[i], buf, 1);
+			numRead += 1;
 		}
 	}
 
@@ -135,6 +135,17 @@ int main()
 	fd3 = open("/proc/sys/vm/drop_caches", O_WRONLY);
 	write(fd3, data, sizeof(char));
 	close(fd3);
+
+	for(int i=0; i<25; i++)
+	{
+		munmap (p[i], 10000000);
+	}
+		for(int i=0; i<25; i++)
+	{
+		p[i] = (char*) mmap (0, 10000000, PROT_READ | PROT_WRITE, MAP_SHARED, fd[i], 0);
+		if (p[i] == MAP_FAILED)
+		        perror ("mmap");
+	}
 
 	gettimeofday(&tim, NULL);
 	t1 = tim.tv_sec + (tim.tv_usec/1000000.0);
