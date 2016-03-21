@@ -67,10 +67,10 @@ void fxn(void* a)
 		if(strcmp("random", glob[6]) == 0)
 			random = 1;
 
-		char str[50] = "get ../Lab02/files/foo1.txt";
+		char str[50] = "get files/foo42.txt";
 
 		if(random == 1)
-			sprintf(str, "get ../Lab02/files/foo%d.txt", r);
+			sprintf(str, "get foo%d.txt", r);
 
 
 		struct timeval tim;
