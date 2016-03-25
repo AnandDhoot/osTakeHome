@@ -58,6 +58,10 @@ int main()
 	}
 		system(cmmd.c_str());
 	struct timeval tim;
+	fd1 = open("/proc/sys/vm/drop_caches", O_WRONLY);
+	write(fd1, data, sizeof(char));
+	close(fd1);
+
 	gettimeofday(&tim, NULL);
 	double t1 = tim.tv_sec + (tim.tv_usec/1000000.0);
 	for(int i=0; i<25; i++)
@@ -101,6 +105,9 @@ int main()
 	system("cat /proc/sys/vm/drop_caches");
 	 cout << "After-----------------------------------------\n";
 	 system(str.c_str());
+	fd1 = open("/proc/sys/vm/drop_caches", O_WRONLY);
+	write(fd1, data, sizeof(char));
+	close(fd1);
 
 	gettimeofday(&tim, NULL);
 	t1 = tim.tv_sec + (tim.tv_usec/1000000.0);
