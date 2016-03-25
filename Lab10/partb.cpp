@@ -40,16 +40,11 @@ int main()
 
 	int fd1;
 	char* data = "3";
-
+	int sum=0;
 	sync();
 	fd1 = open("/proc/sys/vm/drop_caches", O_WRONLY);
 	write(fd1, data, sizeof(char));
 	close(fd1);
-
-	struct timeval tim;
-	gettimeofday(&tim, NULL);
-	double t1 = tim.tv_sec + (tim.tv_usec/1000000.0);
-
 	for(int i=0; i<25; i++)
 	{
 		char* rdSeek = p[i];
@@ -57,10 +52,26 @@ int main()
 		while(num < 10000000)
 		{
 			char a = *(rdSeek + num);
+			sum+=a;
 			num += 1;
 		}
 	}
-
+		system(cmmd.c_str());
+	struct timeval tim;
+	gettimeofday(&tim, NULL);
+	double t1 = tim.tv_sec + (tim.tv_usec/1000000.0);
+	for(int i=0; i<25; i++)
+	{
+		char* rdSeek = p[i];
+		int num = 0;
+		while(num < 10000000)
+		{
+			char a = *(rdSeek + num);
+			sum+=a;
+			num += 1;
+		}
+	}
+	cout<<sum<<endl;
 	gettimeofday(&tim, NULL);
 	double t2 = tim.tv_sec + (tim.tv_usec/1000000.0);
 	double totTime = (t2 - t1);
@@ -69,7 +80,9 @@ int main()
 	{
 		close(fd[i]);
 	}
-
+	int fd2 = open("/proc/sys/vm/drop_caches", O_WRONLY);
+	write(fd2, data, sizeof(char));
+	close(fd2);
 
 	cout << "Opening the files (without memory mapping)" << endl;
 	for(int i=0; i<25; i++)
@@ -78,7 +91,6 @@ int main()
 		fd[i] = open(name.c_str(), O_RDWR);
 	}
 
-	int fd2;
 
 	 cout << "Before-----------------------------------------\n";
 	 system(str.c_str());
@@ -92,18 +104,20 @@ int main()
 
 	gettimeofday(&tim, NULL);
 	t1 = tim.tv_sec + (tim.tv_usec/1000000.0);
-
+	sum=0;
 	char buf[512];
 	for(int i=0; i<25; i++)
 	{
 		int numRead = 0;
 		while(numRead < 10000000)
 		{
-			read(fd[i], buf, 1);
-			numRead += 1;
+			read(fd[i], buf, 512);
+			for(int k=0;k<512;k++)
+				sum+=buf[k];
+			numRead += 512;
 		}
 	}
-
+	cout<<sum<<endl;
 	gettimeofday(&tim, NULL);
 	t2 = tim.tv_sec + (tim.tv_usec/1000000.0);
 	totTime = (t2 - t1);
@@ -146,7 +160,8 @@ int main()
 		if (p[i] == MAP_FAILED)
 		        perror ("mmap");
 	}
-
+	fd3 = open("/proc/sys/vm/drop_caches", O_WRONLY);
+	write(fd3, data, sizeof(char));
 	gettimeofday(&tim, NULL);
 	t1 = tim.tv_sec + (tim.tv_usec/1000000.0);
 
@@ -162,7 +177,10 @@ int main()
 
 		}
 	}
-
+	for(int i=0; i<25; i++)
+	{
+		munmap (p[i], 10000000);
+	}
 	gettimeofday(&tim, NULL);
 	t2 = tim.tv_sec + (tim.tv_usec/1000000.0);
 	totTime = (t2 - t1);
@@ -204,16 +222,16 @@ int main()
 			numRead += 512;
 		}
 	}
-
+	for(int i=0; i<25; i++)
+	{
+		close(fd[i]);
+	}
 	gettimeofday(&tim, NULL);
 	t2 = tim.tv_sec + (tim.tv_usec/1000000.0);
 	totTime = (t2 - t1);
 	cout << totTime << " seconds writing without Memory Mapping" << endl;
 
-	for(int i=0; i<25; i++)
-	{
-		close(fd[i]);
-	}
+
 	cout << "Exiting" << endl;
 
 
