@@ -186,8 +186,11 @@ int main()
 	}
 	for(int i=0; i<25; i++)
 	{
+		msync(p[i],10000000,MS_SYNC);
 		munmap (p[i], 10000000);
+
 	}
+
 	gettimeofday(&tim, NULL);
 	t2 = tim.tv_sec + (tim.tv_usec/1000000.0);
 	totTime = (t2 - t1);
