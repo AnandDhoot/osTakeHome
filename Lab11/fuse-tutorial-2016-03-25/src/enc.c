@@ -3,15 +3,15 @@
 #include <openssl/hmac.h>
 #include <openssl/buffer.h>
 #include <stdio.h>
-#include <iostream>
-#include <string>
+// #include <iostream>
+// #include <string>
 #include <string.h>
 #include <stdlib.h>
 #include <math.h>
-
+	
 // Code example uses partail code from: http://stackoverflow.com/questions/3141860/aes-ctr-256-encryption-mode-of-operation-on-openssl
 // Mostly in the ctr_ state, and init_ctr functions. 
-using namespace std;
+// using namespace std;
 struct ctr_state 
 { 
 	unsigned char ivec[AES_BLOCK_SIZE];	 
@@ -94,17 +94,17 @@ void fdecrypt(unsigned char* read, unsigned char* write,int size, const unsigned
 	AES_ctr128_encrypt(read, write, size, &key, state.ivec, state.ecount, &state.num);
 }
 
-int main(int argc, char *argv[])
-{
-	unsigned char w[1024],w1[1024];
-	string d;
-	cin>>d;
-    fencrypt(reinterpret_cast< const unsigned char*>(d.c_str()), w,d.size(), (unsigned const char*)"1234567812345678");
-    printf("%s\n",w );
-    int n;
-    printf("Enter Required Prefix Length\n");
-    cin>>n;
-	fdecrypt(w, w1,n, (unsigned const char*)"1234567812345678");
-	  printf("%.*s\n",n,w1 );
-	return 0;
-}
+// int main(int argc, char *argv[])
+// {
+// 	unsigned char w[1024],w1[1024];
+// 	string d;
+// 	cin>>d;
+//     fencrypt(reinterpret_cast< const unsigned char*>(d.c_str()), w,d.size(), (unsigned const char*)"1234567812345678");
+//     printf("%s\n",w );
+//     int n;
+//     printf("Enter Required Prefix Length\n");
+//     cin>>n;
+// 	fdecrypt(w, w1,n, (unsigned const char*)"1234567812345678");
+// 	  printf("%.*s\n",n,w1 );
+// 	return 0;
+// }

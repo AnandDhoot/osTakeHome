@@ -161,16 +161,16 @@ CTAGS = ctags
 am__DIST_COMMON = $(srcdir)/Makefile.in $(srcdir)/config.h.in \
 	$(top_srcdir)/depcomp
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
-ACLOCAL = ${SHELL} /users/ug13/anchit/Downloads/fuse-tutorial-2016-03-25/missing aclocal-1.15
+ACLOCAL = ${SHELL} /users/ug13/ananddhoot/Desktop/333/Lab11/fuse-tutorial-2016-03-25/missing aclocal-1.15
 AMTAR = $${TAR-tar}
 AM_DEFAULT_VERBOSITY = 1
-AUTOCONF = ${SHELL} /users/ug13/anchit/Downloads/fuse-tutorial-2016-03-25/missing autoconf
-AUTOHEADER = ${SHELL} /users/ug13/anchit/Downloads/fuse-tutorial-2016-03-25/missing autoheader
-AUTOMAKE = ${SHELL} /users/ug13/anchit/Downloads/fuse-tutorial-2016-03-25/missing automake-1.15
+AUTOCONF = ${SHELL} /users/ug13/ananddhoot/Desktop/333/Lab11/fuse-tutorial-2016-03-25/missing autoconf
+AUTOHEADER = ${SHELL} /users/ug13/ananddhoot/Desktop/333/Lab11/fuse-tutorial-2016-03-25/missing autoheader
+AUTOMAKE = ${SHELL} /users/ug13/ananddhoot/Desktop/333/Lab11/fuse-tutorial-2016-03-25/missing automake-1.15
 AWK = gawk
 CC = gcc
 CCDEPMODE = depmode=gcc3
-CFLAGS = -g -O2 
+CFLAGS = -g -O2
 CPP = gcc -E
 CPPFLAGS = 
 CYGPATH_W = echo
@@ -182,7 +182,7 @@ ECHO_T =
 EGREP = /bin/grep -E
 EXEEXT = 
 FUSE_CFLAGS = -D_FILE_OFFSET_BITS=64 -I/usr/include/fuse  
-FUSE_LIBS = -pthread -lfuse 
+FUSE_LIBS = -pthread -lfuse  
 GREP = /bin/grep
 INSTALL = /usr/bin/install -c
 INSTALL_DATA = ${INSTALL} -m 644
@@ -193,7 +193,7 @@ LDFLAGS =
 LIBOBJS = 
 LIBS = 
 LTLIBOBJS = 
-MAKEINFO = ${SHELL} /users/ug13/anchit/Downloads/fuse-tutorial-2016-03-25/missing makeinfo
+MAKEINFO = ${SHELL} /users/ug13/ananddhoot/Desktop/333/Lab11/fuse-tutorial-2016-03-25/missing makeinfo
 MKDIR_P = /bin/mkdir -p
 OBJEXT = o
 PACKAGE = fuse-tutorial
@@ -211,10 +211,10 @@ SET_MAKE =
 SHELL = /bin/bash
 STRIP = 
 VERSION = 2016-03-25
-abs_builddir = /users/ug13/anchit/Downloads/fuse-tutorial-2016-03-25/src
-abs_srcdir = /users/ug13/anchit/Downloads/fuse-tutorial-2016-03-25/src
-abs_top_builddir = /users/ug13/anchit/Downloads/fuse-tutorial-2016-03-25
-abs_top_srcdir = /users/ug13/anchit/Downloads/fuse-tutorial-2016-03-25
+abs_builddir = /users/ug13/ananddhoot/Desktop/333/Lab11/fuse-tutorial-2016-03-25/src
+abs_srcdir = /users/ug13/ananddhoot/Desktop/333/Lab11/fuse-tutorial-2016-03-25/src
+abs_top_builddir = /users/ug13/ananddhoot/Desktop/333/Lab11/fuse-tutorial-2016-03-25
+abs_top_srcdir = /users/ug13/ananddhoot/Desktop/333/Lab11/fuse-tutorial-2016-03-25
 ac_ct_CC = gcc
 am__include = include
 am__leading_dot = .
@@ -233,7 +233,7 @@ host_alias =
 htmldir = ${docdir}
 includedir = ${prefix}/include
 infodir = ${datarootdir}/info
-install_sh = ${SHELL} /users/ug13/anchit/Downloads/fuse-tutorial-2016-03-25/install-sh
+install_sh = ${SHELL} /users/ug13/ananddhoot/Desktop/333/Lab11/fuse-tutorial-2016-03-25/install-sh
 libdir = ${exec_prefix}/lib
 libexecdir = ${exec_prefix}/libexec
 localedir = ${datarootdir}/locale
@@ -256,7 +256,7 @@ top_builddir = ..
 top_srcdir = ..
 bbfs_SOURCES = bbfs.c log.c log.h  params.h
 AM_CFLAGS = -D_FILE_OFFSET_BITS=64 -I/usr/include/fuse  
-LDADD = -pthread -lfuse -lssl -lcrypto     /usr/lib/x86_64-linux-gnu/libcrypto.a
+LDADD = -pthread -lfuse  -lssl -lcrypto     /usr/lib/x86_64-linux-gnu/libcrypto.a
 all: config.h
 	$(MAKE) $(AM_MAKEFLAGS) all-am
 
