@@ -32,10 +32,12 @@
 #include <libgen.h>
 #include <limits.h>
 #include <stdlib.h>
+#include <math.h>
 #include <stdio.h>
 #include <string.h>
 #include <unistd.h>
 #include <sys/types.h>
+#include <sys/stat.h>
 
 #ifdef HAVE_SYS_XATTR_H
 #include <sys/xattr.h>
@@ -339,11 +341,25 @@ int bb_read(const char *path, char *buf, size_t size, off_t offset, struct fuse_
     // no need to get fpath on this one, since I work from fi->fh not the path
     log_fi(fi);
 
-        char* temp=malloc(size+1);
-        int a = pread(fi->fh, temp, size, offset);
-        fdecrypt(temp, buf, size, (unsigned const char*)"1234567812345678");
+        int start = 16 * (int)(offset / 16); 
+        int end = 16 * ceil((size + offset)/16);
+        char* temp1= malloc(16);
+        char* buf1 = malloc(16);
+        for(int i=start; i<end; i+=16)
+        {
+          int a = pread(fi->fh, temp1, 16, i);
+          fdecrypt(temp1, buf1, 16, (unsigned const char*)"1234567812345678");          
+          for(int j=0; j<16; j++)
+          {
+            if(i+j >= offset && i+j <= (size + offset))
+            {
+              buf[i+j-offset] = buf1[j];
+            }
+          }
+        }
+        // Errors NOT handled
 
-    return log_syscall("pread", a, 0);
+    return log_syscall("pread", size, 0);
 }
 
 /** Write data to an open file
@@ -367,12 +383,38 @@ int bb_write(const char *path, const char *buf, size_t size, off_t offset,
     // no need to get fpath on this one, since I work from fi->fh not the path
     log_fi(fi);
 
+        struct stat s;
+        fstat(fi->fh, &s);
+        int fsizeMax = s.st_size;
+        malloc();
+        // pwrite(fi->fh, )
 
-        char* temp=malloc(size);
-        // fencrypt(reinterpret_cast< const unsigned char*>(buf.c_str()), temp, size, (unsigned const char*)"1234567812345678");
-        fencrypt((const unsigned char*)(buf), temp, size, (unsigned const char*)"1234567812345678");
 
-    return log_syscall("pwrite", pwrite(fi->fh, temp, size, offset), 0);
+        int start = 16 * (int)(offset / 16); 
+        int end = 16 * ceil((size + offset)/16);
+        char* tempr= malloc(16);
+        char* buf1 = malloc(16);
+        char* tempw= malloc(16);
+        for(int i=start; i<end; i+=16)
+        {
+          pread(fi->fh, tempr, 16, i);
+          fdecrypt(tempr, buf1, 16, (unsigned const char*)"1234567812345678");          
+          for(int j=0; j<16; j++)
+          {
+            if(i+j >= offset && i+j <= (size + offset))
+            {
+              tempw[j] = buf[i+j-offset];
+            }
+            else
+              tempw[j] = buf[j];
+            char* bufw = malloc(16);
+            fencrypt((const unsigned char*)(tempw), bufw, 16, (unsigned const char*)"1234567812345678");
+            pwrite(fi->fh, bufw, 16, i);
+          }
+        }
+        // Errors NOT handled
+
+    return log_syscall("pwrite", size, 0);
 }
 
 /** Get file system statistics
