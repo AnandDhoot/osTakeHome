@@ -23,7 +23,7 @@
 */
 
 #include "params.h"
-
+ 
 #include <ctype.h>
 #include <dirent.h>
 #include <errno.h>
@@ -339,39 +339,10 @@ int bb_read(const char *path, char *buf, size_t size, off_t offset, struct fuse_
     log_msg("\nbb_read(path=\"%s\", buf=0x%08x, size=%d, offset=%lld, fi=0x%08x)\n",
       path, buf, size, offset, fi);
     // no need to get fpath on this one, since I work from fi->fh not the path
-    log_fi(fi);
-            struct stat s;
-        fstat(fi->fh, &s);
-        int fsizeMax = s.st_size;
-        log_msg("Fsize %d\n",fsizeMax );
-        int start = 16 * (int)(offset / 16); 
-        int end = 16 * ceil((size + offset)/16.0);
-        if(end>fsizeMax)
-          end=fsizeMax;
-        char* temp1= malloc(16);
-        char* buf1 = malloc(16);
-        int count=0;
-        for(int i=start; i<end; i+=16)
-        {
-            int k=16;
-            if(i+16>size+offset)
-              k=size+offset-i;
-          int a = pread(fi->fh, temp1, k, i);
-          fdecrypt(temp1, buf1, k, (unsigned const char*)"1234567812345678");          
-          for(int j=0; j<k; j++)
-          {
-            if(i+j >= offset && i+j <= (size + offset))
-            {
-              buf[i+j-offset] = buf1[j];
-              count++;
-            }
-          }
-        }
-        //buf[size]='\0';
-          //log_msg("Data%s\n",buf);
-        // Errors NOT handled
-
-    return log_syscall("pread", count, 0);
+    pread(fi->fh,buf,size,offset);
+    for(int i=0;i<size;i++)
+      fdecrypt(buf+i, buf+i, 1, (unsigned const char*)"1234567812345678"); 
+    return log_syscall("pread", size, 0);
 }
 
 /** Write data to an open file
@@ -394,44 +365,11 @@ int bb_write(const char *path, const char *buf, size_t size, off_t offset,
       );
     // no need to get fpath on this one, since I work from fi->fh not the path
     log_fi(fi);
-        struct stat s;
-        fstat(fi->fh, &s);
-        int fsizeMax = s.st_size;
-
-        log_msg("Fsize : %d\n",fsizeMax);
-        log_msg("Message : %.*s\n",size,buf);
-        // pwrite(fi->fh, )0';
-        int start = 16 * (int)(offset / 16); 
-        int end = 16 * ceil((size + offset)/16.0);
-        char* tempr= malloc(16);
-        char* buf1 = malloc(16);
-        char* tempw= malloc(16);
-        for(int i=start; i<end; i+=16)
-        {
-            int k=16;
-            if(i+16>size+offset)
-              k=size+offset-i;
-            log_msg("K : %d\n",k);
-            pread(fi->fh, tempr, k, i);
-            fdecrypt(tempr, buf1, k, (unsigned const char*)"1234567812345678"); 
-            log_msg("Message1 : %.*s\n",k,buf1);          
-          for(int j=0; j<k; j++)
-          {
-            if(i+j >= offset && i+j <=(size + offset))
-            {
-              tempw[j] = buf[i+j-offset];
-            }
-            else
-              tempw[j] = buf1[j];
-          }
-            char* bufw = malloc(16);
-log_msg("Message2 : %.*s\n",k,tempw);    
-            fencrypt((const unsigned char*)(tempw), bufw, k, (unsigned const char*)"1234567812345678");
-            //log_msg("Data %s\n",bufw);
-            pwrite(fi->fh, bufw, k, i);
-        }
-        // Errors NOT handled
-
+    char* buf3=malloc(size);
+        for(int i=0;i<size;i++)
+        fencrypt(buf+i, buf3+i, 1, (unsigned const char*)"1234567812345678"); 
+    pwrite(fi->fh,buf3,size,offset);    
+    free(buf3);
     return log_syscall("pwrite", size, 0);
 }
 
