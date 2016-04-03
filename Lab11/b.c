@@ -41,7 +41,7 @@ int init_ctr(struct ctr_state *state, const unsigned char iv[16])
     memset(state->ivec + 8, 0, 8);
 
     /* Copy IV into 'ivec' */
-    memcpy(state->ivec, iv, 8);
+    //memcpy(state->ivec, iv, 8);
 }
 
 void fencrypt(const unsigned char* read,unsigned char* write,int size, const unsigned char* enc_key)
@@ -105,8 +105,7 @@ int main(int argc, char *argv[])
     int n;
     printf("Enter Required Prefix Length\n");
     cin>>n;
-    unsigned char* w2=w+1;
-	fdecrypt(w2, w1,n, (unsigned const char*)"1234567812345678");
+	fdecrypt(w, w1,n, (unsigned const char*)"1234567812345678");
 	  printf("%.*s\n",n,w1 );
 	return 0;
 }
