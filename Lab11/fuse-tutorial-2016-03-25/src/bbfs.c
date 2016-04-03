@@ -345,15 +345,20 @@ int bb_read(const char *path, char *buf, size_t size, off_t offset, struct fuse_
         int fsizeMax = s.st_size;
         log_msg("Fsize %d\n",fsizeMax );
         int start = 16 * (int)(offset / 16); 
-        int end = 16 * ceil((size + offset)/16);
+        int end = 16 * ceil((size + offset)/16.0);
+        if(end>fsizeMax)
+          end=fsizeMax;
         char* temp1= malloc(16);
         char* buf1 = malloc(16);
         int count=0;
         for(int i=start; i<end; i+=16)
         {
-          int a = pread(fi->fh, temp1, 16, i);
-          fdecrypt(temp1, buf1, 16, (unsigned const char*)"1234567812345678");          
-          for(int j=0; j<16; j++)
+            int k=16;
+            if(i+16>size+offset)
+              k=size+offset-i;
+          int a = pread(fi->fh, temp1, k, i);
+          fdecrypt(temp1, buf1, k, (unsigned const char*)"1234567812345678");          
+          for(int j=0; j<k; j++)
           {
             if(i+j >= offset && i+j <= (size + offset))
             {
@@ -398,20 +403,21 @@ int bb_write(const char *path, const char *buf, size_t size, off_t offset,
         // pwrite(fi->fh, )0';
         int start = 16 * (int)(offset / 16); 
         int end = 16 * ceil((size + offset)/16.0);
-           if(fsizeMax<size+offset){
-            char* zerobuf  = malloc(end-fsizeMax );
-          pwrite(fi->fh,zerobuf, end-fsizeMax  ,fsizeMax);
-        }
         char* tempr= malloc(16);
         char* buf1 = malloc(16);
         char* tempw= malloc(16);
         for(int i=start; i<end; i+=16)
         {
-          pread(fi->fh, tempr, 16, i);
-          fdecrypt(tempr, buf1, 16, (unsigned const char*)"1234567812345678");          
-          for(int j=0; j<16; j++)
+            int k=16;
+            if(i+16>size+offset)
+              k=size+offset-i;
+            log_msg("K : %d\n",k);
+            pread(fi->fh, tempr, k, i);
+            fdecrypt(tempr, buf1, k, (unsigned const char*)"1234567812345678"); 
+            log_msg("Message1 : %.*s\n",k,buf1);          
+          for(int j=0; j<k; j++)
           {
-            if(i+j >= offset && i+j < (size + offset))
+            if(i+j >= offset && i+j <=(size + offset))
             {
               tempw[j] = buf[i+j-offset];
             }
@@ -419,9 +425,10 @@ int bb_write(const char *path, const char *buf, size_t size, off_t offset,
               tempw[j] = buf1[j];
           }
             char* bufw = malloc(16);
-            fencrypt((const unsigned char*)(tempw), bufw, 16, (unsigned const char*)"1234567812345678");
+log_msg("Message2 : %.*s\n",k,tempw);    
+            fencrypt((const unsigned char*)(tempw), bufw, k, (unsigned const char*)"1234567812345678");
             //log_msg("Data %s\n",bufw);
-            pwrite(fi->fh, bufw, 16, i);
+            pwrite(fi->fh, bufw, k, i);
         }
         // Errors NOT handled
 
